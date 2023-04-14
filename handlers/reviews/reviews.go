@@ -3,33 +3,38 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"os/exec"
+
+	uuid "github.com/satori/go.uuid"
 
 	models "github.com/chandanaavadhani/BusService/models"
 	repository "github.com/chandanaavadhani/BusService/repository"
+	utils "github.com/chandanaavadhani/BusService/utils"
 	validators "github.com/chandanaavadhani/BusService/validators"
 )
 
 func generateRatingId() string {
-	ratingID, err := exec.Command("uuidgen").Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(ratingID)
+	// newUUID, err := exec.Command("uuidgen").Output()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println("Generated UUID:")
+	// fmt.Printf("%s", newUUID)
+	// return string(newUUID)
+	ratingId := uuid.NewV4()
+	return ratingId.String()
 }
 
 func AddReviews(w http.ResponseWriter, r *http.Request) {
 
 	//Validate method
 	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		utils.BuildResponse(w, http.StatusMethodNotAllowed, "Method not allowed", nil)
 	}
 
 	//Generate rating ID
 	ratingId := generateRatingId()
-	fmt.Println(ratingID)
+	fmt.Println(ratingId)
 
 	// get user id
 	userId := "83064af3-bb81-4514-a6d4-afba340825cd"
@@ -58,5 +63,5 @@ func AddReviews(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//send response
-
+	utils.BuildResponse(w, http.StatusCreated, "Review added successfully", nil)
 }

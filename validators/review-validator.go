@@ -7,7 +7,7 @@ import (
 	models "github.com/chandanaavadhani/BusService/models"
 )
 
-func ValidateUser(review models.Review) (int, error) {
+func ValidateReviews(review models.Review) (int, error) {
 
 	if review.BusId == "" {
 		return http.StatusBadRequest, errors.New("Bus ID missing")

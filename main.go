@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	handlers "github.com/chandanaavadhani/BusService/handlers/Operators"
+	handlers "github.com/chandanaavadhani/BusService/handlers/reviews"
 	repository "github.com/chandanaavadhani/BusService/repository"
 )
 
@@ -16,7 +16,8 @@ func main() {
 		fmt.Println("Error in Connecting the DB : ", err)
 	}
 	//handling routes
-	http.HandleFunc("/v1/operators", handlers.CreateOperator)
+	// http.HandleFunc("/v1/operators", handlers.CreateOperator)
+	http.HandleFunc("/v1/addreview", handlers.AddReviews)
 
 	//hosting the server
 	fmt.Println("Local host is servered at port 8000")
