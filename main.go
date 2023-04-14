@@ -4,19 +4,22 @@ import (
 	"fmt"
 	"net/http"
 
-	handlers "github.com/chandanaavadhani/BusService/handlers/Operators"
+	handlers1 "github.com/chandanaavadhani/BusService/handlers/operators"
+	handlers "github.com/chandanaavadhani/BusService/handlers/users"
 	repository "github.com/chandanaavadhani/BusService/repository"
 )
 
 func main() {
 	db, err := repository.DBConnection()
-	defer db.Close()
 
 	if err != nil {
 		fmt.Println("Error in Connecting the DB : ", err)
 	}
+	defer db.Close()
 	//handling routes
-	http.HandleFunc("/operators", handlers.CreateOperator)
+	http.HandleFunc("/operators", handlers1.CreateOperator)
+	http.HandleFunc("/v1/signup", handlers.Signup)
+	http.HandleFunc("/v1/login", handlers.Login)
 
 	//hosting the server
 	fmt.Println("Local host is servered at port 8000")
