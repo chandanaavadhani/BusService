@@ -16,7 +16,7 @@ func main() {
 		fmt.Println("Error in Connecting the DB : ", err)
 	}
 	//handling routes
-	http.HandleFunc("/operators", handlers.CreateOperator)
+	http.HandleFunc("/v1/operators", handlers.CreateOperator)
 
 	//hosting the server
 	fmt.Println("Local host is servered at port 8000")
