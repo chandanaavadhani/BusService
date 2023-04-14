@@ -1,7 +1,10 @@
 package handlers
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
-func main() {
+func CreateOperator(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Hello")
 }
