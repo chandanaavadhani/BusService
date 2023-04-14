@@ -14,13 +14,6 @@ import (
 )
 
 func generateRatingId() string {
-	// newUUID, err := exec.Command("uuidgen").Output()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Println("Generated UUID:")
-	// fmt.Printf("%s", newUUID)
-	// return string(newUUID)
 	ratingId := uuid.NewV4()
 	return ratingId.String()
 }
