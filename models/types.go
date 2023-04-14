@@ -9,7 +9,7 @@ type Response struct {
 
 type Bus struct {
 	BusId      string `json:"bus_id"`
-	OperatorId string `json:"opertor_id"`
+	OperatorId string `json:"operator_id"`
 	Contact    string `json:"contact"`
 	Capacity   int    `json:"capacity"`
 	BusType    string `json:"bus_type"`
@@ -24,16 +24,27 @@ type AddBusRequest struct {
 }
 
 type Trip struct {
-	TripId    string `json:"trip_id"`
-	BusId     string `json:"bus_id"`
-	RouteId   string `json:"route_id"`
-	Departure string `json:"departure"`
-	Arrival   string `json:"arrival"`
-	Cost      string `json:"cost"`
+	TripId    string  `json:"trip_id"`
+	BusId     string  `json:"bus_id"`
+	RouteId   string  `json:"route_id"`
+	Departure string  `json:"departure"`
+	Arrival   string  `json:"arrival"`
+	Cost      float64 `json:"cost"`
+	Capacity  int     `json:"capacity"`
+	BusStatus string  `json:"bus_status"`
 }
 
 type TokenClaim struct {
 	Username   string `json:"username"`
 	IsOperator string `json:"isoperator"`
 	jwt.StandardClaims
+}
+
+type AddTripRequest struct {
+	BusId     string  `json:"bus_id"`
+	RouteId   string  `json:"route_id"`
+	Departure string  `json:"departure"`
+	Arrival   string  `json:"arrival"`
+	Cost      float64 `json:"cost"`
+	BusStatus string  `json:"bus_status"`
 }

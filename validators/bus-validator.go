@@ -2,7 +2,8 @@ package validators
 
 import (
 	"fmt"
-	"main/BusService/models"
+
+	"github.com/chandanaavadhani/BusService/models"
 )
 
 func ValidateAddBusRequest(request models.AddBusRequest) error {

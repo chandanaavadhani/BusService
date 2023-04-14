@@ -2,8 +2,9 @@ package utils
 
 import (
 	"encoding/json"
-	models "main/BusService/models"
 	"net/http"
+
+	"github.com/chandanaavadhani/BusService/models"
 )
 
 // Build a Response

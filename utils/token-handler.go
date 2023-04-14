@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	models "main/BusService/models"
+	"github.com/chandanaavadhani/BusService/models"
 
 	"github.com/dgrijalva/jwt-go"
 )
