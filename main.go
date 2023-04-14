@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	handlers "github.com/chandanaavadhani/BusService/handlers"
+	handlers "github.com/chandanaavadhani/BusService/handlers/Operators"
 	repository "github.com/chandanaavadhani/BusService/repository"
 )
 

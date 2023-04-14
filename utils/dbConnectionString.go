@@ -18,17 +18,17 @@ func GetConnectionString() string {
 
 	user := os.Getenv("DB_USER")
 	if user == "" {
-		user = "sravan"
+		user = "team"
 	}
 
 	password := os.Getenv("DB_PASS")
 	if password == "" {
-		password = "Sravan@2509"
+		password = "Project@1"
 	}
 
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
-		dbName = "golang"
+		dbName = "bus service"
 	}
 
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
