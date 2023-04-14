@@ -2,6 +2,6 @@ package repository
 
 import "fmt"
 
-func main() {
+func dbmain() {
 	fmt.Println("Hello")
 }

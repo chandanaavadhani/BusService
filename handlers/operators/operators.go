@@ -2,6 +2,6 @@ package handlers
 
 import "fmt"
 
-func main() {
+func CreateOperator() {
 	fmt.Println("Hello")
 }
