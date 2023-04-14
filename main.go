@@ -5,20 +5,22 @@ import (
 	"net/http"
 
 	coupons "github.com/chandanaavadhani/BusService/handlers/coupons"
-	operators "github.com/chandanaavadhani/BusService/handlers/operators"
 	"github.com/chandanaavadhani/BusService/repository"
 )
 
 func main() {
 	db, err := repository.DBConnection()
-	defer db.Close()
-
 	if err != nil {
 		fmt.Println("Error in Connecting the DB : ", err)
 	}
+	defer db.Close()
+
 	//handling routes
-	http.HandleFunc("/operators", operators.CreateOperator)
-	http.HandleFunc("/v1/coupons", coupons.CreateCoupon)
+	http.HandleFunc("/v1/coupons/add", coupons.CreateCoupon)
+	http.HandleFunc("/v1/coupons/update", coupons.UpdateCoupon)
+	http.HandleFunc("/v1/coupons/delete", coupons.DeleteOrGetCoupon)
+	http.HandleFunc("/v1/coupons/coupon", coupons.DeleteOrGetCoupon)
+	http.HandleFunc("/v1/coupons/list", coupons.GetAllCoupons)
 
 	//hosting the server
 	fmt.Println("Local host is servered at port 8000")
