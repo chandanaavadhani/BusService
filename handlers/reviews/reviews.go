@@ -42,7 +42,7 @@ func AddReviews(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//validate request
-	status, err := validators.ValidateReviews(review)
+	status, err := validators.ValidateReviews(userId, review)
 	if err != nil {
 		http.Error(w, err.Error(), status)
 		return

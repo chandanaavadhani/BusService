@@ -1,6 +1,13 @@
 package repository
 
 import (
+	"database/sql"
+	"fmt"
+	"log"
+	"net/http"
+	"strconv"
+	"time"
+
 	models "github.com/chandanaavadhani/BusService/models"
 )
 
@@ -83,7 +90,6 @@ func GetTripDetails(tripId string) ([]models.TripDetails, error) {
 	defer db.Close()
 
 	// get trips from the database
-
 	// Execute the SQL query
 	query := `
 	SELECT 
@@ -123,4 +129,207 @@ func GetTripDetails(tripId string) ([]models.TripDetails, error) {
 	}
 
 	return tripDetails, nil
+}
+
+func InsertPaymentDetails(paymentId string, booking models.Bookings) error {
+	// DB connection
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Generate a timestamp
+	timestamp := time.Now().Unix()
+	fmt.Println(timestamp)
+
+	//Insert review into Database
+	stmt, err := db.Prepare("INSERT INTO payments (paymentID, paymentStatus, paymentType, amountPaid, paymentDate ) VALUES (?,?,?,?,?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(paymentId, booking.PaymentStatus, booking.Method, booking.AmountPaid, timestamp)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func InsertBookingDetails(bookingId string, userId string, paymentId string, booking models.Bookings) error {
+
+	// DB connection
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	//Insert review into Database
+	stmt, err := db.Prepare("INSERT INTO bookings (bookingID, userID, tripID,paymentID,couponCode, passengers, bookingStatus) VALUES (?,?,?,?,?,?,?)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(bookingId, userId, booking.TripId, paymentId, booking.CouponCode, booking.Passengers, booking.BookingStatus)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func CheckIfTripExists(tripId string) bool {
+	//DB connection
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Prepare the SQL query
+	query := "SELECT tripID FROM trips WHERE tripID = ?"
+
+	// Execute the query and check if a record is returned
+	var result string
+	err = db.QueryRow(query, tripId).Scan(&result)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatal(err)
+		}
+	}
+	return true
+}
+
+func CheckIfReviewAdded(busId string, userId string) bool {
+	//DB connection
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Construct the SQL query with placeholders for the input values
+	query := `SELECT * FROM reviews WHERE busID = ? AND userID = ?;`
+
+	// Execute the query with the input values
+	rows, err := db.Query(query, busId, userId)
+	if err != nil {
+		return false
+	}
+	defer rows.Close()
+
+	// Check if any rows were returned by the query
+	exists := false
+	for rows.Next() {
+		exists = true
+	}
+
+	// Return true if any rows were returned, false otherwise
+	return exists
+}
+
+func CheckIfCouponExists(coupon string) bool {
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Prepare the SQL query
+	query := "SELECT couponCode FROM discounts WHERE couponCode = ?"
+
+	// Execute the query and check if a record is returned
+	var result string
+	err = db.QueryRow(query, coupon).Scan(&result)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatal(err)
+		}
+	}
+	return true
+}
+
+func CheckIfPaymentExists(paymentId string) bool {
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Prepare the SQL query
+	query := "SELECT paymentID FROM payments WHERE paymentID = ?"
+
+	// Execute the query and check if a record is returned
+	var result string
+	err = db.QueryRow(query, paymentId).Scan(&result)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatal(err)
+		}
+	}
+	return true
+}
+
+func GetTripCost(tripId string) float64 {
+	//DB connection
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Prepare the SQL query
+	query := "SELECT cost FROM trips WHERE tripId = ?"
+	var result string
+	err = db.QueryRow(query, tripId).Scan(&result)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return http.StatusNotFound
+		} else {
+			log.Fatal(err)
+		}
+	}
+	cost, err := strconv.ParseFloat(result, 64)
+	if err != nil {
+		// Handle the error if the string cannot be converted to an integer
+		fmt.Println("Error: could not convert string to int64")
+	}
+	return cost
+}
+
+func GetCouponAmount(couponCode string) float64 {
+	//DB connection
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Prepare the SQL query
+	query := "SELECT cost FROM trips WHERE tripId = ?"
+	var result string
+	err = db.QueryRow(query, couponCode).Scan(&result)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return http.StatusNotFound
+		} else {
+			log.Fatal(err)
+		}
+	}
+	couponAmount, err := strconv.ParseFloat(result, 64)
+	if err != nil {
+		// Handle the error if the string cannot be converted to an integer
+		fmt.Println("Error: could not convert string to int64")
+	}
+	return couponAmount
 }

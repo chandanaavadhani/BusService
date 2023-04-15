@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	// handlers "github.com/chandanaavadhani/BusService/handlers/reviews"
+	handlers2 "github.com/chandanaavadhani/BusService/handlers/bookings"
+	handlers1 "github.com/chandanaavadhani/BusService/handlers/reviews"
 	handlers "github.com/chandanaavadhani/BusService/handlers/trips"
 	repository "github.com/chandanaavadhani/BusService/repository"
 )
@@ -18,9 +19,10 @@ func main() {
 	}
 	//handling routes
 	// http.HandleFunc("/v1/operators", handlers.CreateOperator)
-	// http.HandleFunc("/v1/addreview", handlers.AddReviews)
+	http.HandleFunc("/v1/addreview", handlers1.AddReviews)
 	http.HandleFunc("/v1/trips", handlers.GetTrips)
 	http.HandleFunc("/v1/trips/", handlers.GetTripDetails)
+	http.HandleFunc("/v1/addbookings", handlers2.AddBookings)
 
 	//hosting the server
 	fmt.Println("Local host is servered at port 8000")

@@ -5,9 +5,10 @@ import (
 	"net/http"
 
 	models "github.com/chandanaavadhani/BusService/models"
+	"github.com/chandanaavadhani/BusService/repository"
 )
 
-func ValidateReviews(review models.Review) (int, error) {
+func ValidateReviews(userId string, review models.Review) (int, error) {
 
 	if review.BusId == "" {
 		return http.StatusBadRequest, errors.New("Bus ID missing")
@@ -17,6 +18,9 @@ func ValidateReviews(review models.Review) (int, error) {
 	}
 	if review.Rating == 0 {
 		return http.StatusBadRequest, errors.New("Rating missing")
+	}
+	if repository.CheckIfReviewAdded(review.BusId, userId) != false {
+		return http.StatusBadRequest, errors.New("Review added already")
 	}
 	return 200, nil
 }

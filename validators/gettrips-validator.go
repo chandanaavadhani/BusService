@@ -1,9 +1,7 @@
 package validators
 
 import (
-	"database/sql"
 	"errors"
-	"log"
 	"net/http"
 	"time"
 
@@ -52,32 +50,9 @@ func ValidateTripId(tripId string) (int, error) {
 	if tripId == "" || tripId == "\n" {
 		return http.StatusBadRequest, errors.New("Missing TripId")
 	}
-	if isTripIDPresent(tripId) != true {
-		return http.StatusBadRequest, errors.New("Invalid Trip ID")
+	if repository.CheckIfTripExists(tripId) != true {
+		return http.StatusBadRequest, errors.New("Invalid TripId")
 	}
+
 	return 200, nil
-}
-
-func isTripIDPresent(tripID string) bool {
-
-	db, err := repository.DBConnection()
-	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-
-	// Prepare the SQL query
-	query := "SELECT tripID FROM trips WHERE tripID = ?"
-
-	// Execute the query and check if a record is returned
-	var result string
-	err = db.QueryRow(query, tripID).Scan(&result)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return false
-		} else {
-			log.Fatal(err)
-		}
-	}
-	return true
 }

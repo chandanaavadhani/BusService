@@ -46,3 +46,13 @@ type TripDetails struct {
 	Destination   string `json:"destination"`
 	Distance      string `json:"distance"`
 }
+
+type Bookings struct {
+	TripId        string  `json:"tripID"`
+	CouponCode    string  `json:"couponCode"`
+	Passengers    string  `json:"passengers"`
+	BookingStatus string  `json:"bookingStatus"`
+	PaymentStatus string  `json:"paymentStatus"`
+	Method        string  `json:"method"`
+	AmountPaid    float64 `json:"amountPaid"`
+}
