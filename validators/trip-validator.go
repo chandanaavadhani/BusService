@@ -50,3 +50,32 @@ func isArrivalFutureOfDeparture(timestamp1, timestamp2 string) bool {
 	}
 	return ts1Int > ts2Int
 }
+
+func ValidateUpdateTripRequest(request models.UpdateTripRequest, db *sql.DB) error {
+	//get trip details
+	trip, err := repository.GetTripDetails(request.TripId, db)
+	if err != nil {
+		return err
+	}
+	if len(trip) == 0 {
+		return fmt.Errorf("record not found for this trip")
+	}
+
+	if request.TripId == trip[0].TripId && request.Arrival == trip[0].Arrival && request.Departure == trip[0].Departure &&
+		request.RouteId == trip[0].RouteId && request.Cost == trip[0].Cost && request.BusStatus == trip[0].BusStatus && request.BusId == trip[0].BusId {
+		return fmt.Errorf("nothing to update")
+	} else if !repository.CheckIfRouteExists(request.RouteId, db) {
+		return fmt.Errorf("invalid routeid")
+	} else if !repository.CheckIfBusExists(request.BusId, db) {
+		return fmt.Errorf("invalid busid")
+	} else if request.BusStatus == "" {
+		return fmt.Errorf("invalid busid")
+	} else if request.Cost == 0 {
+		return fmt.Errorf("invalid cost")
+	} else if request.Departure == "" || !isFuture(request.Departure) {
+		return fmt.Errorf("invalid departure date & time")
+	} else if request.Arrival == "" || !isArrivalFutureOfDeparture(request.Arrival, request.Departure) {
+		return fmt.Errorf("invalid arrival date or arrival time must be ahead of departure time")
+	}
+	return nil
+}

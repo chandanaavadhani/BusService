@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/chandanaavadhani/BusService/models"
 	"github.com/chandanaavadhani/BusService/repository"
@@ -113,4 +114,43 @@ func GetAllBusses(w http.ResponseWriter, r *http.Request) {
 	}
 	//Send Response
 	utils.BuildResponse(w, http.StatusOK, "", allBusses)
+}
+
+func DeleteOrGetBus(w http.ResponseWriter, r *http.Request) {
+	var data []string
+	if r.Method == http.MethodDelete {
+		//Delete bus
+	} else if r.Method == http.MethodGet {
+		fmt.Println("This is called")
+		//Establish DB connection
+		db, err := repository.DBConnection()
+		if err != nil {
+			utils.BuildResponse(w, http.StatusMethodNotAllowed, "not a POST request", data)
+			return
+		}
+		defer db.Close()
+
+		//Get busId from req URL
+		path := r.URL.Path
+		segments := strings.Split(path, "/")
+		busID := segments[2]
+
+		//Validate Bus Request
+		isBusExists := validators.ValidateBusExistence(busID, db)
+		if !isBusExists {
+			utils.BuildResponse(w, http.StatusBadRequest, "bus doesn't exist", data)
+		}
+
+		//Get bus details
+		bus, err := repository.GetBusById(busID, db)
+		if err != nil {
+			utils.BuildResponse(w, http.StatusInternalServerError, err.Error(), data)
+			return
+		}
+
+		//return success response
+		utils.BuildResponse(w, http.StatusOK, "", bus)
+	} else {
+		utils.BuildResponse(w, http.StatusMethodNotAllowed, "request not allowed", data)
+	}
 }

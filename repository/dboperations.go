@@ -33,22 +33,55 @@ func AddBusToDB(bus models.AddBusRequest, operatorId string, db *sql.DB) error {
 	return nil
 }
 
-func GetAllBusses(db *sql.DB) ([]models.Bus, error) {
-	var allBusses []models.Bus
+func GetAllBusses(db *sql.DB) ([]models.BusDetails, error) {
+	var allBusses []models.BusDetails
 	//get rows from DB
-	rows, err := db.Query("SELECT * FROM buses")
+	rows, err := db.Query(`SELECT buses.*, reviews.ratingID,reviews.userID, reviews.comment,reviews.rating
+	FROM buses
+	LEFT JOIN reviews
+	ON buses.busID = reviews.busID`)
 	if err != nil {
 		return allBusses, err
 	}
 
+	var busDetails models.BusDetails
 	for rows.Next() {
-		var row models.Bus
-		err = rows.Scan(&row.BusId, &row.OperatorId, &row.Contact, &row.Capacity, &row.BusType, &row.BusNumber)
+		//Declaring variables because reviews can be null
+		var ratingID sql.NullString
+		var rating sql.NullInt64
+		var comment sql.NullString
+		var userid sql.NullString
+
+		err = rows.Scan(&busDetails.BusId, &busDetails.OperatorId, &busDetails.Contact, &busDetails.Capacity, &busDetails.BusType, &busDetails.BusNumber, &ratingID, &userid, &comment, &rating)
+
 		if err != nil {
 			return allBusses, err
 		}
 
-		allBusses = append(allBusses, row)
+		index := checkIfBusIdExistsInData(allBusses, busDetails.BusId)
+
+		//Building review
+		var review models.ReviewResponseFromDBForBus
+		review.RatingID = ratingID.String
+		review.Comment = comment.String
+		review.UserID = userid.String
+		review.Rating = rating.Int64
+
+		if index == -1 {
+			//If There are no rating for this bus is null in DB
+			if !rating.Valid {
+				allBusses = append(allBusses, busDetails)
+				continue
+			}
+			//If bus doesn't exist in that array , add bus to that array
+			busDetails.Reviews = append(busDetails.Reviews, review)
+
+			allBusses = append(allBusses, busDetails)
+			continue
+		}
+
+		//If bus exists , add review to reviews array of that bus details
+		allBusses[index].Reviews = append(allBusses[index].Reviews, review)
 	}
 
 	// Handle any errors that occurred during iteration
@@ -60,22 +93,65 @@ func GetAllBusses(db *sql.DB) ([]models.Bus, error) {
 	return allBusses, nil
 }
 
-func GetAllBussesOfOperator(operatorId string, db *sql.DB) ([]models.Bus, error) {
-	var allBusses []models.Bus
+func checkIfBusIdExistsInData(data []models.BusDetails, busid string) int {
+	for i := 0; i < len(data); i++ {
+		if data[i].BusId == busid {
+			return i
+		}
+	}
+	return -1
+}
+
+func GetAllBussesOfOperator(operatorId string, db *sql.DB) ([]models.BusDetails, error) {
+	var allBusses []models.BusDetails
 	//get rows from DB
-	rows, err := db.Query("SELECT * FROM buses WHERE operatorID = ?", operatorId)
+	rows, err := db.Query(`SELECT buses.*, reviews.ratingID,reviews.userID, reviews.comment,reviews.rating
+	FROM buses
+	LEFT JOIN reviews
+	ON buses.busID = reviews.busID
+	WHERE buses.operatorID = ?`, operatorId)
 	if err != nil {
 		return allBusses, err
 	}
 
+	var busDetails models.BusDetails
 	for rows.Next() {
-		var row models.Bus
-		err = rows.Scan(&row.BusId, &row.OperatorId, &row.Contact, &row.Capacity, &row.BusType, &row.BusNumber)
+		//Declaring variables because reviews can be null
+		var ratingID sql.NullString
+		var rating sql.NullInt64
+		var comment sql.NullString
+		var userid sql.NullString
+
+		err = rows.Scan(&busDetails.BusId, &busDetails.OperatorId, &busDetails.Contact, &busDetails.Capacity, &busDetails.BusType, &busDetails.BusNumber, &ratingID, &userid, &comment, &rating)
+
 		if err != nil {
 			return allBusses, err
 		}
 
-		allBusses = append(allBusses, row)
+		index := checkIfBusIdExistsInData(allBusses, busDetails.BusId)
+
+		//Building review
+		var review models.ReviewResponseFromDBForBus
+		review.RatingID = ratingID.String
+		review.Comment = comment.String
+		review.UserID = userid.String
+		review.Rating = rating.Int64
+
+		if index == -1 {
+			//If There are no rating for this bus is null in DB
+			if !rating.Valid {
+				allBusses = append(allBusses, busDetails)
+				continue
+			}
+			//If bus doesn't exist in that array , add bus to that array
+			busDetails.Reviews = append(busDetails.Reviews, review)
+
+			allBusses = append(allBusses, busDetails)
+			continue
+		}
+
+		//If bus exists , add review to reviews array of that bus details
+		allBusses[index].Reviews = append(allBusses[index].Reviews, review)
 	}
 
 	// Handle any errors that occurred during iteration
@@ -131,4 +207,203 @@ func AddTriptoDB(request models.AddTripRequest, capacity int, db *sql.DB) error 
 	}
 	return nil
 
+}
+
+func GetBusById(busid string, db *sql.DB) (models.BusDetails, error) {
+	var busDetails models.BusDetails
+	busid += "\n"
+	//get all ratings for that busID
+	rows, err := db.Query(`SELECT buses.*, reviews.ratingID,reviews.userID, reviews.comment,reviews.rating
+							FROM buses
+							LEFT JOIN reviews
+							ON buses.busID = reviews.busID
+							WHERE buses.busID =?`, busid)
+
+	if err != nil {
+		return busDetails, err
+	}
+	defer rows.Close()
+	var count int
+	var review models.ReviewResponseFromDBForBus
+
+	//Iterate through all the rows
+	for rows.Next() {
+		var RatingID sql.NullString
+		var Rating sql.NullInt64
+		var comment sql.NullString
+		var userid sql.NullString
+
+		err = rows.Scan(&busDetails.BusId, &busDetails.OperatorId, &busDetails.Contact, &busDetails.Capacity, &busDetails.BusType, &busDetails.BusNumber, &RatingID, &userid, &comment, &Rating)
+
+		if err != nil {
+			return busDetails, err
+		}
+		//check if rating is null in db
+		if RatingID.Valid {
+			review.Comment = comment.String
+			review.Rating = Rating.Int64
+			review.RatingID = RatingID.String
+			review.UserID = userid.String
+			busDetails.Reviews = append(busDetails.Reviews, review)
+		}
+
+		count++
+	}
+
+	if count == 0 {
+		return busDetails, fmt.Errorf("no data for that busID")
+	}
+
+	return busDetails, nil
+}
+
+func GetTripDetails(tripId string, db *sql.DB) ([]models.TripDetails, error) {
+
+	// get trips from the database
+
+	// Execute the SQL query
+	query := `
+	SELECT 
+	t.*,
+	b.driverContact,
+	b.capacity,
+	b.busNumber,
+	b.busType,
+	b.operatorID,
+	r.source,
+	r.destination,
+	r.distance
+	FROM trips t
+	JOIN buses b ON t.busID = b.busID
+	JOIN route r ON t.routeID = r.routeID 
+	WHERE t.tripID = ?
+    `
+	rows, err := db.Query(query, tripId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tripDetails []models.TripDetails
+	for rows.Next() {
+		var tripDetail models.TripDetails
+		err := rows.Scan(&tripDetail.TripId, &tripDetail.BusId, &tripDetail.RouteId, &tripDetail.Departure, &tripDetail.Arrival, &tripDetail.Capacity, &tripDetail.Cost, &tripDetail.BusStatus,
+			&tripDetail.DriverContact, &tripDetail.BusCapacity, &tripDetail.BusType, &tripDetail.BusNumber, &tripDetail.OperatorId,
+			&tripDetail.Destination, &tripDetail.Source, &tripDetail.Distance)
+		if err != nil {
+			return nil, err
+		}
+		tripDetails = append(tripDetails, tripDetail)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tripDetails, nil
+}
+
+func UpdateTripDetails(request models.UpdateTripRequest, db *sql.DB) error {
+	// Prepare the SQL statement
+	stmt, err := db.Prepare("UPDATE trips SET routeID=?, busID=?, busStatus=?, departure=?, arrival=?, cost=? WHERE tripID=?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	// Execute the SQL statement
+	_, err = stmt.Exec(request.RouteId, request.BusId, request.BusStatus, request.Departure, request.Arrival, request.Cost, request.TripId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetAllTripsDetails(db *sql.DB) ([]models.TripDetails, error) {
+
+	// get trips from the database
+
+	// Execute the SQL query
+	query := `
+	SELECT 
+	t.*,
+	b.driverContact,
+	b.capacity,
+	b.busNumber,
+	b.busType,
+	b.operatorID,
+	r.source,
+	r.destination,
+	r.distance
+	FROM trips t
+	JOIN buses b ON t.busID = b.busID
+	JOIN route r ON t.routeID = r.routeID 
+    `
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tripDetails []models.TripDetails
+	for rows.Next() {
+		var tripDetail models.TripDetails
+		err := rows.Scan(&tripDetail.TripId, &tripDetail.BusId, &tripDetail.RouteId, &tripDetail.Departure, &tripDetail.Arrival, &tripDetail.Capacity, &tripDetail.Cost, &tripDetail.BusStatus,
+			&tripDetail.DriverContact, &tripDetail.BusCapacity, &tripDetail.BusType, &tripDetail.BusNumber, &tripDetail.OperatorId,
+			&tripDetail.Destination, &tripDetail.Source, &tripDetail.Distance)
+		if err != nil {
+			return nil, err
+		}
+		tripDetails = append(tripDetails, tripDetail)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tripDetails, nil
+}
+
+func GetAllTripsDetailsOfOperator(operatorid string, db *sql.DB) ([]models.TripDetails, error) {
+
+	// get trips from the database
+
+	// Execute the SQL query
+	query := `
+	SELECT 
+	t.*,
+	b.driverContact,
+	b.capacity,
+	b.busNumber,
+	b.busType,
+	b.operatorID,
+	r.source,
+	r.destination,
+	r.distance
+	FROM trips t
+	JOIN buses b ON t.busID = b.busID
+	JOIN route r ON t.routeID = r.routeID
+	WHERE b.operatorID = ?
+    `
+	rows, err := db.Query(query, operatorid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tripDetails []models.TripDetails
+	for rows.Next() {
+		var tripDetail models.TripDetails
+		err := rows.Scan(&tripDetail.TripId, &tripDetail.BusId, &tripDetail.RouteId, &tripDetail.Departure, &tripDetail.Arrival, &tripDetail.Capacity, &tripDetail.Cost, &tripDetail.BusStatus,
+			&tripDetail.DriverContact, &tripDetail.BusCapacity, &tripDetail.BusType, &tripDetail.BusNumber, &tripDetail.OperatorId,
+			&tripDetail.Destination, &tripDetail.Source, &tripDetail.Distance)
+		if err != nil {
+			return nil, err
+		}
+		tripDetails = append(tripDetails, tripDetail)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return tripDetails, nil
 }

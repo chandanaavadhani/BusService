@@ -1,9 +1,11 @@
 package validators
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/chandanaavadhani/BusService/models"
+	"github.com/chandanaavadhani/BusService/repository"
 )
 
 func ValidateAddBusRequest(request models.AddBusRequest) error {
@@ -17,4 +19,8 @@ func ValidateAddBusRequest(request models.AddBusRequest) error {
 		return fmt.Errorf("invalid Bus Type")
 	}
 	return nil
+}
+
+func ValidateBusExistence(busid string, db *sql.DB) bool {
+	return repository.CheckIfBusExists(busid, db)
 }
