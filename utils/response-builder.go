@@ -15,5 +15,18 @@ func BuildResponse(w http.ResponseWriter, code int, message string, data interfa
 
 	//write response
 	w.WriteHeader(code)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(buildRequestResponse)
+	// response := models.Response{
+	// 	Message: message,
+	// 	Data:    data,
+	// }
+	// jsonResponse, err := json.Marshal(response)
+	// if err != nil {
+	// 	BuildResponse(w, http.StatusInternalServerError, err.Error(), nil)
+	// 	return
+	// }
+	// w.Header().Set("Content-Type", "application/json")
+	// w.WriteHeader(code)
+	// w.Write(jsonResponse)
 }
