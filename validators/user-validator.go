@@ -2,6 +2,6 @@ package validators
 
 import "fmt"
 
-func main() {
+func geuser() {
 	fmt.Println("Hello")
 }
