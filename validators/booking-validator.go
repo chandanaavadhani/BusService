@@ -46,3 +46,14 @@ func ValidateBookingRequest(paymentId string, booking models.Bookings) (int, err
 
 	return 200, nil
 }
+
+func ValidateBookingId(bookingId string) (int, error) {
+	if bookingId == "" || bookingId == "\n" {
+		return http.StatusBadRequest, errors.New("Missing Booking ID")
+	}
+	if repository.CheckIfBookingIDExists(bookingId) != true {
+		return http.StatusBadRequest, errors.New("Invalid Booking ID")
+	}
+
+	return 200, nil
+}

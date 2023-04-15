@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/chandanaavadhani/BusService/models"
 	"github.com/chandanaavadhani/BusService/repository"
@@ -70,4 +71,53 @@ func AddBookings(w http.ResponseWriter, r *http.Request) {
 
 	//send response
 	utils.BuildResponse(w, http.StatusCreated, "Bookings added successfully", nil)
+}
+
+func ValidateCoupon(w http.ResponseWriter, r *http.Request) {
+	// Validate Method
+	if r.Method != "GET" {
+		utils.BuildResponse(w, http.StatusMethodNotAllowed, "Method Not Allowed", nil)
+	}
+	//get coupon code from the url
+	couponCode := strings.Split(r.URL.Path, "/coupon/")[1]
+	fmt.Println(couponCode)
+
+	//validate coupon code
+	status, err := validators.ValidateCouponCode(couponCode)
+	if err != nil {
+		http.Error(w, err.Error(), status)
+		return
+	}
+
+	//send response
+	utils.BuildResponse(w, http.StatusOK, "Valid Coupon Code", nil)
+
+}
+
+func GetBookingDetails(w http.ResponseWriter, r *http.Request) {
+
+	// Validate Method
+	if r.Method != "GET" {
+		utils.BuildResponse(w, http.StatusMethodNotAllowed, "Method not Allowed", nil)
+	}
+
+	// Get Booking Id from the URL
+	bookingId := strings.Split(r.URL.Path, "/bookings/")[1]
+
+	//Validate Trip id
+	status, err := validators.ValidateBookingId(bookingId)
+	if err != nil {
+		http.Error(w, err.Error(), status)
+		return
+	}
+
+	//Get trips from the database
+	bookingDetails, err := repository.GetBookingDetails(bookingId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	//send response
+	utils.BuildResponse(w, http.StatusOK, "Get Booking details successfully", bookingDetails)
+
 }

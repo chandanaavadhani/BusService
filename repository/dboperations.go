@@ -279,6 +279,28 @@ func CheckIfPaymentExists(paymentId string) bool {
 	}
 	return true
 }
+func CheckIfBookingIDExists(bookingId string) bool {
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// Prepare the SQL query
+	query := "SELECT bookingID FROM bookings WHERE bookingID = ?"
+
+	// Execute the query and check if a record is returned
+	var result string
+	err = db.QueryRow(query, bookingId).Scan(&result)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false
+		} else {
+			log.Fatal(err)
+		}
+	}
+	return true
+}
 
 func GetTripCost(tripId string) float64 {
 	//DB connection
@@ -332,4 +354,58 @@ func GetCouponAmount(couponCode string) float64 {
 		fmt.Println("Error: could not convert string to int64")
 	}
 	return couponAmount
+}
+
+func GetBookingDetails(bookingId string) ([]models.BookingDetails, error) {
+
+	// DB connection
+	db, err := DBConnection()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	// get trips from the database
+	// Execute the SQL query
+	query := `
+	SELECT 
+	b.*,
+	py.paymentStatus,
+	py.paymentType,
+	py.amountPaid,
+	py.paymentDate,
+	p.PassengerName,
+	p.Age,
+	p.Gender,
+	p.Contact
+	FROM bookings b
+	JOIN passengers p ON p.PassengerId = b.passengers
+	JOIN payments py ON py.paymentID = b.paymentID
+	WHERE b.bookingId = ?
+    `
+	rows, err := db.Query(query, bookingId)
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	var bookingDetails []models.BookingDetails
+	for rows.Next() {
+		var bookingDetail models.BookingDetails
+		err := rows.Scan(&bookingDetail.BookingId, &bookingDetail.UserId, &bookingDetail.TripId, &bookingDetail.PaymentId,
+			&bookingDetail.CouponCode, &bookingDetail.Passengers, &bookingDetail.BookingStatus, &bookingDetail.PaymentStatus,
+			&bookingDetail.Method, &bookingDetail.AmountPaid, &bookingDetail.PaymentDate, &bookingDetail.PassengerName,
+			&bookingDetail.Age, &bookingDetail.Gender, &bookingDetail.Contact)
+		if err != nil {
+			return nil, err
+
+		}
+		fmt.Println(bookingDetail)
+		bookingDetails = append(bookingDetails, bookingDetail)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return bookingDetails, nil
 }

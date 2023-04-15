@@ -56,3 +56,21 @@ type Bookings struct {
 	Method        string  `json:"method"`
 	AmountPaid    float64 `json:"amountPaid"`
 }
+
+type BookingDetails struct {
+	BookingId     string  `json:"bookingID"`
+	UserId        string  `json:"userID"`
+	TripId        string  `json:"tripID"`
+	PaymentId     string  `json:"paymentID"`
+	CouponCode    string  `json:"couponCode"`
+	Passengers    string  `json:"passengers"`
+	BookingStatus string  `json:"bookingStatus"`
+	PaymentStatus string  `json:"paymentStatus"`
+	Method        string  `json:"method"`
+	AmountPaid    float64 `json:"amountPaid"`
+	PaymentDate   string  `json:"paymentDate"`
+	PassengerName string  `json:"passengerName"`
+	Age           string  `json:"age"`
+	Gender        string  `json:"gender"`
+	Contact       string  `json:"contact"`
+}
