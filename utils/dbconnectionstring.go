@@ -8,7 +8,7 @@ import (
 func GetConnectionString() string {
 	host := os.Getenv("DB_HOST")
 	if host == "" {
-		host = "192.168.1.67"
+		host = "localhost"
 	}
 
 	port := os.Getenv("DB_PORT")
@@ -18,12 +18,12 @@ func GetConnectionString() string {
 
 	user := os.Getenv("DB_USER")
 	if user == "" {
-		user = "team"
+		user = "root"
 	}
 
 	password := os.Getenv("DB_PASS")
 	if password == "" {
-		password = "Project@1"
+		password = "9515"
 	}
 
 	dbName := os.Getenv("DB_NAME")
