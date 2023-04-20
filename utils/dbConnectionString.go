@@ -8,7 +8,7 @@ import (
 func GetConnectionString() string {
 	host := os.Getenv("DB_HOST")
 	if host == "" {
-		host = "192.168.1.67"
+		host = "localhost"
 	}
 
 	port := os.Getenv("DB_PORT")
@@ -18,17 +18,17 @@ func GetConnectionString() string {
 
 	user := os.Getenv("DB_USER")
 	if user == "" {
-		user = "team"
+		user = "root"
 	}
 
 	password := os.Getenv("DB_PASS")
 	if password == "" {
-		password = "Project@1"
+		password = "Shotgun@01"
 	}
 
 	dbName := os.Getenv("DB_NAME")
 	if dbName == "" {
-		dbName = "bus service"
+		dbName = "bus_service"
 	}
 
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
