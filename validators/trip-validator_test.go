@@ -55,3 +55,24 @@ func TestIsFuture(t *testing.T) {
 		t.Errorf("isFuture(%v) = true; want false", invalidTimestamp)
 	}
 }
+
+func TestIsArrivalFutureOfDeparture(t *testing.T) {
+	// future arrival timestamp and past departure timestamp
+	arrivalTimestamp := strconv.FormatInt(time.Now().Unix()+3600, 10)
+	departureTimestamp := strconv.FormatInt(time.Now().Unix()-3600, 10)
+	if !isArrivalFutureOfDeparture(arrivalTimestamp, departureTimestamp) {
+		t.Errorf("isArrivalFutureOfDeparture(%v, %v) = false; want true", arrivalTimestamp, departureTimestamp)
+	}
+
+	// past arrival timestamp and future departure timestamp
+	arrivalTimestamp = strconv.FormatInt(time.Now().Unix()-3600, 10)
+	departureTimestamp = strconv.FormatInt(time.Now().Unix()+3600, 10)
+	if isArrivalFutureOfDeparture(arrivalTimestamp, departureTimestamp) {
+		t.Errorf("isArrivalFutureOfDeparture(%v, %v) = true; want false", arrivalTimestamp, departureTimestamp)
+	}
+
+	// invalid timestamps
+	if isArrivalFutureOfDeparture("invalid-timestamp", "invalid-timestamp") {
+		t.Errorf("isArrivalFutureOfDeparture(%v, %v) = true; want false", "invalid-timestamp", "invalid-timestamp")
+	}
+}
