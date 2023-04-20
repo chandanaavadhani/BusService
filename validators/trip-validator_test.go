@@ -1,7 +1,9 @@
 package validators
 
 import (
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/chandanaavadhani/BusService/models"
 	"github.com/chandanaavadhani/BusService/repository"
@@ -30,4 +32,26 @@ func TestValidateAddTripRequest(t *testing.T) {
 		t.Errorf("Expected %q doesn't match with actual result %q", actual, expected)
 	}
 
+}
+
+func TestIsFuture(t *testing.T) {
+	currentTime := time.Now().Unix()
+
+	// future timestamp
+	futureTimestamp := strconv.FormatInt(currentTime+3600, 10)
+	if !isFuture(futureTimestamp) {
+		t.Errorf("isFuture(%v) = false; want true", futureTimestamp)
+	}
+
+	// past timestamp
+	pastTimestamp := strconv.FormatInt(currentTime-3600, 10)
+	if isFuture(pastTimestamp) {
+		t.Errorf("isFuture(%v) = true; want false", pastTimestamp)
+	}
+
+	// invalid timestamp
+	invalidTimestamp := "invalid-timestamp"
+	if isFuture(invalidTimestamp) {
+		t.Errorf("isFuture(%v) = true; want false", invalidTimestamp)
+	}
 }
