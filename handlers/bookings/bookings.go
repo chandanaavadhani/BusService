@@ -104,14 +104,14 @@ func GetBookingDetails(w http.ResponseWriter, r *http.Request) {
 	// Get Booking Id from the URL
 	bookingId := strings.Split(r.URL.Path, "/bookings/")[1]
 
-	//Validate Trip id
+	//Validate booking id
 	status, err := validators.ValidateBookingId(bookingId)
 	if err != nil {
 		http.Error(w, err.Error(), status)
 		return
 	}
 
-	//Get trips from the database
+	//Get booking details from the database
 	bookingDetails, err := repository.GetBookingDetails(bookingId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

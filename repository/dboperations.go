@@ -89,7 +89,7 @@ func GetTripDetails(tripId string) ([]models.TripDetails, error) {
 	}
 	defer db.Close()
 
-	// get trips from the database
+	// get trips deatils from the database by tripID
 	// Execute the SQL query
 	query := `
 	SELECT 
@@ -338,7 +338,7 @@ func GetCouponAmount(couponCode string) float64 {
 	defer db.Close()
 
 	// Prepare the SQL query
-	query := "SELECT cost FROM trips WHERE tripId = ?"
+	query := "SELECT cost FROM trips WHERE couponcode = ?"
 	var result string
 	err = db.QueryRow(query, couponCode).Scan(&result)
 	if err != nil {
@@ -365,7 +365,7 @@ func GetBookingDetails(bookingId string) ([]models.BookingDetails, error) {
 	}
 	defer db.Close()
 
-	// get trips from the database
+	// get booking details from the database
 	// Execute the SQL query
 	query := `
 	SELECT 
